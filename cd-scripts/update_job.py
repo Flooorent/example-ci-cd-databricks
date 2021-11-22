@@ -6,7 +6,7 @@ import requests
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--databricks-instance", type=str, help="Databricks instance")
+    parser.add_argument("--workspace-url", type=str, help="Databricks workspace url, starting with 'https'")
     parser.add_argument("--pat", type=str, help="Databricks personal access token")
     parser.add_argument("--wheel-version", type=str, help="New wheel version")
     parser.add_argument(
@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    update_job_url = f"https://{args.databricks_instance}/api/2.1/jobs/update"
+    update_job_url = f"{args.workspace_url}/api/2.1/jobs/update"
     headers = {"Authorization": f"Bearer {args.pat}"}
 
     job_conf = {

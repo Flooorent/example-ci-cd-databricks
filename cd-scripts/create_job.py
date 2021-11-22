@@ -6,7 +6,7 @@ import requests
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--databricks-instance", type=str, help="Databricks instance")
+    parser.add_argument("--workspace-url", type=str, help="Databricks workspace url, starting with 'https'")
     parser.add_argument("--pat", type=str, help="Databricks personal access token")
     parser.add_argument("--wheel-version", type=str, help="Wheel version")
     parser.add_argument(
@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    create_job_url = f"https://{args.databricks_instance}/api/2.1/jobs/create"
+    create_job_url = f"{args.workspace_url}/api/2.1/jobs/create"
     headers = {"Authorization": f"Bearer {args.pat}"}
 
     storage_account = "flomlworkshopprodstorage"
