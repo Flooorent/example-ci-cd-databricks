@@ -224,3 +224,87 @@ class TestInitTable:
 
         assert_df_equality(actual_df, df_2, ignore_row_order=True)
         assert set(actual_partition_columns) == set(partitioning_columns_2)
+
+
+class TestMergeUpdates:
+    def test_merge_updates(self, spark: SparkSession, temp_dir: str):
+        table_path = f"{temp_dir}/utils/data/TestMergeUpdates/test_merge_updates"
+
+        schema = ", ".join(
+            [
+                "country string",
+                "first_name string",
+                "last_name string",
+                "age int",
+                "email string",
+                "status string",
+            ]
+        )
+
+        init_df = spark.createDataFrame(
+            [
+                ["US", "John", "Doe", 30, "john.doe@gmail.com", "Added"],
+                ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com", "Added"],
+                ["FR", "laura", "simon", 50, "laura.simon@gmail.com", "Added"],
+            ],
+            schema
+        )
+
+        partitioning_columns = ["country"]
+        init_table(table_path, init_df, partitioning_columns)
+
+        updates = spark.createDataFrame(
+            [
+                ["US", "John", "Doe", 31, "john.doe@gmail.com", "Updated"],
+                ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com", "Removed"],
+                ["IT", "marco", "simone", 70, "marco.simone@gmail.com", "Added"],
+            ],
+            schema
+        )
+
+        merge_updates(table_path, updates)
+
+        actual_df = spark.read.format("delta").load(table_path)
+
+        expected_df = spark.createDataFrame(
+            [
+                ["US", "John", "Doe", 31, "john.doe@gmail.com", "Updated"],
+                ["FR", "laura", "simon", 50, "laura.simon@gmail.com", "Added"],
+                ["IT", "marco", "simone", 70, "marco.simone@gmail.com", "Added"],
+            ],
+            schema
+        )
+
+        assert_df_equality(actual_df, expected_df, ignore_row_order=True)
+
+    def test_merge_empty_updates(self, spark: SparkSession, temp_dir: str):
+        table_path = f"{temp_dir}/utils/data/TestMergeUpdates/test_merge_empty_updates"
+
+        schema = ", ".join(
+            [
+                "country string",
+                "first_name string",
+                "last_name string",
+                "age int",
+                "email string",
+                "status string",
+            ]
+        )
+
+        init_df = spark.createDataFrame(
+            [
+                ["US", "John", "Doe", 30, "john.doe@gmail.com", "Added"],
+                ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com", "Added"],
+                ["FR", "laura", "simon", 50, "laura.simon@gmail.com", "Added"],
+            ],
+            schema
+        )
+
+        partitioning_columns = ["country"]
+        init_table(table_path, init_df, partitioning_columns)
+
+        updates = spark.createDataFrame([], schema)
+        merge_updates(table_path, updates)
+
+        actual_df = spark.read.format("delta").load(table_path)
+        assert_df_equality(actual_df, init_df, ignore_row_order=True)

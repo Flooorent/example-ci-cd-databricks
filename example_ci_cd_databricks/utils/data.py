@@ -22,9 +22,12 @@ def init_table(path: str, df: DataFrame, partitioning_columns: list = None, over
     df_writer.save(path)
 
 
-# TODO: docstring
-# TODO: unit tests
 def merge_updates(table_path: str, updates: DataFrame):
+    """Merge new updates based on the email address.
+
+    :param table_path: Delta table's path where data is stored
+    :param updates: updates dataframe
+    """
     spark = SparkSession.builder.getOrCreate()
 
     (
