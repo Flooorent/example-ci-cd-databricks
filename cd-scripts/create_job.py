@@ -28,6 +28,9 @@ if __name__ == "__main__":
     container_name = "example-ci-cd"
     container_path = f"abfss://{container_name}@{storage_account}.dfs.core.windows.net"
 
+    cleaned_wheel_version = args.wheel_version.lstrip("v")
+    full_wheel_name = f"example_ci_cd_databricks-{cleaned_wheel_version}-py3-none-any.whl"
+
     job_conf = {
         "name": "job",
         "tasks": [
@@ -49,7 +52,7 @@ if __name__ == "__main__":
                 },
                 "libraries": [
                     {
-                        "whl": f"{args.dbfs_wheel_dir}/{args.wheel_version}"
+                        "whl": f"{args.dbfs_wheel_dir}/{full_wheel_name}"
                     }
                 ]
             }

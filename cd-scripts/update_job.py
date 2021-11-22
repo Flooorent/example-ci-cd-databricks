@@ -22,13 +22,16 @@ if __name__ == "__main__":
     update_job_url = f"{args.workspace_url}/api/2.1/jobs/update"
     headers = {"Authorization": f"Bearer {args.pat}"}
 
+    cleaned_wheel_version = args.wheel_version.lstrip("v")
+    full_wheel_name = f"example_ci_cd_databricks-{cleaned_wheel_version}-py3-none-any.whl"
+
     job_conf = {
         "job_id": args.job_id,
         "new_settings":
             {
                 "libraries": [
                     {
-                        "whl": f"{args.dbfs_wheel_dir}/{args.wheel_version}"
+                        "whl": f"{args.dbfs_wheel_dir}/{full_wheel_name}"
                     }
                 ]
             }
