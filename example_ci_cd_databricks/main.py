@@ -1,5 +1,4 @@
 import argparse
-import logging
 import sys
 
 from pyspark.sql import SparkSession
@@ -20,9 +19,22 @@ def entry_point():
         help="Choose between an init and a merge. Default is merge",
         choices=["init", "merge"],
     )
+    parser.add_argument("--scope", type=str, help="Databricks secret scope")
+    parser.add_argument("--storage-uri", type=str, help="Databricks secret key for the Azure storage account URI")
+    parser.add_argument("--storage-key", type=str, help="Databricks secret key for the Azure storage account key")
 
     args = parser.parse_args()
     spark = SparkSession.builder.getOrCreate()
+
+    # import DBUtils inside function entry_point and not at the top of the file to prevent error
+    # ModuleNotFoundError: No module named 'pyspark.dbutils' (since this is specific to Databricks and not open source)
+    from pyspark.dbutils import DBUtils
+    dbutils = DBUtils(spark)
+
+    adls_storage_uri = dbutils.secrets.get(scope=args.scope, key=args.storage_uri)
+    adls_storage_key = dbutils.secrets.get(scope=args.scope, key=args.storage_key)
+
+    spark.conf.set(adls_storage_uri, adls_storage_key)
 
     main(spark, vars(args))
 
@@ -32,14 +44,14 @@ def main(spark: SparkSession, args: dict):
     cleaned_data = format_names(new_data)
 
     if args["action"] == "init":
-        logging.info("Initializing the output table...")
+        print("Initializing the output table...")
         partitioning_columns = ["country"]
-        init_table(args["output_path"], cleaned_data, partitioning_columns)
+        init_table(args["output_path"], cleaned_data, partitioning_columns, overwrite=True)
     else:
-        logging.info("Merging updates...")
+        print("Merging updates...")
         merge_updates(args["output_path"], cleaned_data)
 
-    logging.info("New data ingested.")
+    print("New data ingested.")
 
 
 if __name__ == "__main__":
