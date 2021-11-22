@@ -66,9 +66,10 @@ stages:
         ArtifactName: '$(Build.Repository.Name)'
 
 - stage: Prod
-  environment: Prod
+
   jobs:
-  - job: Deploy to prod
+  - deployment: Deploy to prod
+    environment: 'Prod'
     steps:
       - script: |
           pip install databricks-cli
