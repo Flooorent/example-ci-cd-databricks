@@ -1,0 +1,62 @@
+trigger:
+  branches:
+    include:
+    - '*'
+  tags:
+    include:
+    - '*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+- job: Tests
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.7'
+    inputs:
+      versionSpec: 3.7
+
+  - checkout: self
+    persistCredentials: true
+    clean: true
+
+  - script: pip install -r requirements.txt
+    displayName: 'Install python dependencies'
+
+  - script: |
+      python -m pytest --junit-xml=$(Build.Repository.LocalPath)/logs/TEST-LOCAL.xml
+    displayName: 'Run Python Unit Tests for library code'
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/TEST-*.xml'
+      failTaskOnFailedTests: true
+      publishRunAttachments: true
+
+# run build phase only on tags
+- job: Build
+  dependsOn: Tests
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.7'
+    inputs:
+      versionSpec: 3.7
+
+  - checkout: self
+    persistCredentials: true
+    clean: true
+
+  - script: pip install setuptools wheel
+    displayName: 'Install python dependencies to package project'
+
+  - script: |
+      python3 setup.py sdist bdist_wheel
+    displayName: 'Build Python Wheel'
+  - script: |
+      cp $(Build.Repository.LocalPath)/dist/*.whl $(Build.ArtifactStagingDirectory)/
+    displayName: 'Copy wheel to artifact directory'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: '$(Build.Repository.Name)'
