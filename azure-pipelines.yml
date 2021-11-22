@@ -9,54 +9,88 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-jobs:
-- job: Tests
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.7'
-    inputs:
-      versionSpec: 3.7
+stages:
+- stage: Run unit tests
+  jobs:
+  - job: Unit tests
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.7'
+      inputs:
+        versionSpec: 3.7
 
-  - checkout: self
-    persistCredentials: true
-    clean: true
+    - checkout: self
+      persistCredentials: true
+      clean: true
 
-  - script: pip install -r requirements.txt
-    displayName: 'Install python dependencies'
+    - script: pip install -r requirements.txt
+      displayName: 'Install python dependencies'
 
-  - script: |
-      python -m pytest --junit-xml=$(Build.Repository.LocalPath)/logs/TEST-LOCAL.xml
-    displayName: 'Run Python Unit Tests for library code'
-  - task: PublishTestResults@2
-    inputs:
-      testResultsFiles: '**/TEST-*.xml'
-      failTaskOnFailedTests: true
-      publishRunAttachments: true
+    - script: |
+        python -m pytest --junit-xml=$(Build.Repository.LocalPath)/logs/TEST-LOCAL.xml
+      displayName: 'Run Python Unit Tests for library code'
 
-# run build phase only on tags
-- job: Build
-  dependsOn: Tests
-  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.7'
-    inputs:
-      versionSpec: 3.7
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFiles: '**/TEST-*.xml'
+        failTaskOnFailedTests: true
+        publishRunAttachments: true
 
-  - checkout: self
-    persistCredentials: true
-    clean: true
+  - job: Build on tags
+    dependsOn: Unit tests
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.7'
+      inputs:
+        versionSpec: 3.7
 
-  - script: pip install setuptools wheel
-    displayName: 'Install python dependencies to package project'
+    - checkout: self
+      persistCredentials: true
+      clean: true
 
-  - script: |
-      python3 setup.py sdist bdist_wheel
-    displayName: 'Build Python Wheel'
-  - script: |
-      cp $(Build.Repository.LocalPath)/dist/*.whl $(Build.ArtifactStagingDirectory)/
-    displayName: 'Copy wheel to artifact directory'
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathToPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: '$(Build.Repository.Name)'
+    - script: pip install setuptools wheel
+      displayName: 'Install python dependencies to package project'
+
+    - script: |
+        python3 setup.py sdist bdist_wheel
+      displayName: 'Build Python Wheel'
+
+    - script: |
+        cp $(Build.Repository.LocalPath)/dist/*.whl $(Build.ArtifactStagingDirectory)/
+      displayName: 'Copy wheel to artifact directory'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: '$(Build.Repository.Name)'
+
+- stage: Prod
+  environment: Prod
+  jobs:
+  - job: Deploy to prod
+    steps:
+      - script: |
+          pip install databricks-cli
+          echo "[DEFAULT]" >> ~/.databrickscfg
+          echo "host = $PROD_WORKSPACE_URL" >> ~/.databrickscfg
+          echo "token = $PROD_PAT" >> ~/.databrickscfg
+        displayName: 'Configure Databricks CLI'
+
+      - script: |
+          databricks fs cp -r \
+          $AGENT_RELEASEDIRECTORY/$RELEASE_PRIMARYARTIFACTSOURCEALIAS/$BUILD_REPOSITORY_NAME/dist/ \
+          dbfs:/wheels/example-ci-cd/
+        displayName: 'Copy wheel to DBFS'
+
+      - script: pip install -r $AGENT_RELEASEDIRECTORY/$RELEASE_PRIMARYARTIFACTSOURCEALIAS/$BUILD_REPOSITORY_NAME/cd-scripts/requirements.txt
+        displayName: 'Install requirements for CD script'
+
+      - script: |
+          python $AGENT_RELEASEDIRECTORY/$RELEASE_PRIMARYARTIFACTSOURCEALIAS/$BUILD_REPOSITORY_NAME/cd-scripts/update_job.py \
+          --job-id $JOB_ID \
+          --workspace-url $PROD_WORKSPACE_URL \
+          --pat $PROD_PAT \
+          --wheel-version $BUILD_SOURCEBRANCHNAME \
+          --dbfs-wheel-dir dbfs:/wheels/example-ci-cd
+        displayName: 'Update job configuration'
