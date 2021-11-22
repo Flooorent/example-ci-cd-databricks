@@ -25,8 +25,7 @@ setuptools.setup(
     install_requires=required,
     entry_points={
         "console_scripts": [
-            "first_job = example_ci_cd_databricks.main_1:entry_point",
-            "second_job = example_ci_cd_databricks.main_2:entry_point",
+            "job = example_ci_cd_databricks.main:entry_point",
         ],
     },
 )
