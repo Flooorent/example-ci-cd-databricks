@@ -18,18 +18,42 @@ if __name__ == "__main__":
     parser.add_argument("--scope", type=str, help="Databricks secret scope")
     parser.add_argument("--storage-uri", type=str, help="Databricks secret key for the Azure storage account URI")
     parser.add_argument("--storage-key", type=str, help="Databricks secret key for the Azure storage account key")
+    parser.add_argument(
+        "--storage-account",
+        type=str,
+        default="flomlworkshopprodstorage",
+        help="Azure storage account where we read and write data",
+    )
+    parser.add_argument(
+        "--container",
+        type=str,
+        default="example-ci-cd",
+        help="Azure storage account's container name where we read and write data",
+    )
+    # NB: for demo purpose we use an existing cluster, but with real production jobs it's better to use a jobs-compute
+    # cluster instead of an all-purpose cluster as it's simply way less expensive
+    parser.add_argument(
+        "--cluster-id",
+        type=str,
+        default="1122-111352-rkzn7ywd",
+        help="Databricks cluster id to use when running the job",
+    )
+    parser.add_argument(
+        "--package-name",
+        type=str,
+        default="example_ci_cd_databricks",
+        help="Python project's package name",
+    )
 
     args = parser.parse_args()
 
     create_job_url = f"{args.workspace_url}/api/2.1/jobs/create"
     headers = {"Authorization": f"Bearer {args.pat}"}
 
-    storage_account = "flomlworkshopprodstorage"
-    container_name = "example-ci-cd"
-    container_path = f"abfss://{container_name}@{storage_account}.dfs.core.windows.net"
+    container_path = f"abfss://{args.container}@{args.storage_account}.dfs.core.windows.net"
 
     cleaned_wheel_version = args.wheel_version.lstrip("v")
-    full_wheel_name = f"example_ci_cd_databricks-{cleaned_wheel_version}-py3-none-any.whl"
+    full_wheel_name = f"{args.package_name}-{cleaned_wheel_version}-py3-none-any.whl"
 
     job_conf = {
         "name": "job",
@@ -37,9 +61,9 @@ if __name__ == "__main__":
             {
                 "task_key": "job",
                 "description": "job",
-                "existing_cluster_id": "1122-111352-rkzn7ywd",
+                "existing_cluster_id": args.cluster_id,
                 "python_wheel_task": {
-                    "package_name": "example_ci_cd_databricks",
+                    "package_name": args.package_name,
                     "entry_point": "job",
                     "named_parameters": {
                         "input-path": f"{container_path}/input_data",
