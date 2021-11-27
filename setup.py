@@ -8,7 +8,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name="example_ci_cd_databricks",
-    version="0.0.2",
+    version="0.0.3",
     author="Florent Moiny",
     author_email="florent.moiny@gmail.com",
     description="Example CI/CD project with Databricks",

@@ -54,7 +54,10 @@ jobs:
       python3 setup.py sdist bdist_wheel
     displayName: 'Build Python Wheel'
   - script: |
-      cp $(Build.Repository.LocalPath)/dist/*.whl $(Build.ArtifactStagingDirectory)/
+      mkdir $(Build.ArtifactStagingDirectory)/dist
+      mkdir $(Build.ArtifactStagingDirectory)/cd-scripts
+      cp $(Build.Repository.LocalPath)/dist/*.whl $(Build.ArtifactStagingDirectory)/dist/
+      cp $(Build.Repository.LocalPath)/cd-scripts/* $(Build.ArtifactStagingDirectory)/cd-scripts/
     displayName: 'Copy wheel to artifact directory'
   - task: PublishBuildArtifacts@1
     inputs:
