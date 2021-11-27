@@ -8,7 +8,7 @@ Example CI/CD with Databricks
 
 ## Continuous delivery scripts
 Those scripts use various Python libraries that need to be installed first. So before running them, create a virtual
-environment and run:
+environment with Python 3.7+ and run:
 ```
 pip install -r ./cd-scripts/requirements.txt
 ```
