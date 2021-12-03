@@ -27,6 +27,9 @@ jobs:
   - script: black --check .
     displayName: 'Check code format'
 
+  - script: flake8 .
+    displayName: 'Check for PEP8 compliance'
+
   - script: |
       python -m pytest --junit-xml=$(Build.Repository.LocalPath)/logs/TEST-LOCAL.xml
     displayName: 'Run Python Unit Tests for library code'

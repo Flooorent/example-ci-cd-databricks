@@ -30,6 +30,28 @@ To format the code:
 black .
 ```
 
+If you can't remember that command, simply run:
+```bash
+make format
+```
+
+NB: black is used as a check in the CI.
+
+### Code compliance with (most of) PEP8
+We use [flake8](https://flake8.pycqa.org/en/latest/index.html) to check for code compliance with (most of) PEP8
+rules. It is configured with file `.flake8`.
+
+To check for PEP8 compliance:
+```bash
+flake8 .
+```
+
+If you can't remember that command, simply run:
+```bash
+make check
+```
+
+NB: flake8 is used as a check in the CI.
 
 ## Workflow
 - use proper .gitignore file

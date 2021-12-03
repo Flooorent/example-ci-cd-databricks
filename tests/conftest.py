@@ -12,7 +12,8 @@ def spark(tmpdir_factory: TempdirFactory) -> SparkSession:
 
     A temporary directory will be created and used to store all Delta tables.
 
-    :param tmpdir_factory: pytest's TempdirFactory fixture, see https://docs.pytest.org/en/6.2.x/tmpdir.html#the-tmpdir-factory-fixture
+    :param tmpdir_factory: pytest's TempdirFactory fixture,
+    see https://docs.pytest.org/en/6.2.x/tmpdir.html#the-tmpdir-factory-fixture
     :return: the Spark session for all unit tests
     """
     warehouse_dir = str(tmpdir_factory.mktemp("warehouse"))

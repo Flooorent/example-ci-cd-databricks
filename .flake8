@@ -1,0 +1,7 @@
+[flake8]
+# since we use 120 characters with black
+max-line-length = 120
+# PEP8's continuation indentation style is not always great
+ignore = E131
+exclude =
+    ./build
