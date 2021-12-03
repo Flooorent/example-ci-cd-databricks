@@ -1,6 +1,36 @@
 # example-ci-cd-databricks
 Example CI/CD with Databricks
 
+## Python stuff
+
+### Dependency management
+Right now all dependencies, even the ones used for dev (e.g. chispa), are pinned and stored in `requirements.txt`. This
+is not optimal: at the very least prod and dev dependencies should be separated, and we should be able to know which
+dependendencies are actually needed by our project and which dependencies are needed by those dependencies. In essence,
+we should probably use a tool such as a [pip-tools](https://github.com/jazzband/pip-tools) or
+[poetry](https://github.com/python-poetry/poetry).
+
+### Unit testing
+We use [pytest](https://docs.pytest.org/en/6.2.x/) as our testing framework and
+[chispa](https://github.com/MrPowers/chispa) for testing Spark code.
+
+### Code formatter
+We use [black](https://github.com/psf/black) as our code formatter.
+We configured it via file `pyproject.toml` to use lines with at maximum 120 characters. NB: it's totally up to you and
+your team to decide which length you want to use, either PEP's 79, 88, or another number. The nice thing about that is
+that at least we show how we can configure black.
+
+To check which files would be formatted with which modification (without actually performing the modifications), run:
+```bash
+black --diff --color .
+```
+
+To format the code:
+```bash
+black .
+```
+
+
 ## Workflow
 - use proper .gitignore file
 - create virtual env

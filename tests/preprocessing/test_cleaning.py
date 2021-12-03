@@ -21,7 +21,7 @@ def test_format_names(spark: SparkSession):
             ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com"],
             ["FR", "laura", "simon", 50, "laura.simon@gmail.com"],
         ],
-        schema
+        schema,
     )
 
     actual_df = format_names(input_df)
@@ -32,7 +32,7 @@ def test_format_names(spark: SparkSession):
             ["US", "jane", "smith", 40, "jane.smith@gmail.com"],
             ["FR", "laura", "simon", 50, "laura.simon@gmail.com"],
         ],
-        schema
+        schema,
     )
 
     assert_df_equality(actual_df, expected_df)

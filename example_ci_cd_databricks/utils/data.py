@@ -31,13 +31,11 @@ def merge_updates(table_path: str, updates: DataFrame):
     spark = SparkSession.builder.getOrCreate()
 
     (
-        DeltaTable.forPath(spark, table_path).alias("t")
-            .merge(
-                updates.alias("s"),
-                "s.email = t.email"
-            )
-            .whenMatchedDelete("s.status = 'Removed'")
-            .whenMatchedUpdateAll()
-            .whenNotMatchedInsertAll()
-            .execute()
+        DeltaTable.forPath(spark, table_path)
+        .alias("t")
+        .merge(updates.alias("s"), "s.email = t.email")
+        .whenMatchedDelete("s.status = 'Removed'")
+        .whenMatchedUpdateAll()
+        .whenNotMatchedInsertAll()
+        .execute()
     )

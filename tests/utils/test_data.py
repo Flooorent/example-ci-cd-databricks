@@ -36,7 +36,9 @@ class TestInitTable:
 
         assert_df_equality(actual_df, expected_df, ignore_row_order=True)
 
-        actual_partition_columns = spark.sql(f"DESCRIBE DETAIL delta.`{table_path}`").select("partitionColumns").head()[0]
+        actual_partition_columns = (
+            spark.sql(f"DESCRIBE DETAIL delta.`{table_path}`").select("partitionColumns").head()[0]
+        )
         assert set(actual_partition_columns) == set(partitioning_columns)
 
     def test_should_not_partition(self, spark: SparkSession, temp_dir: str):
@@ -66,8 +68,12 @@ class TestInitTable:
 
         assert_df_equality(actual_df, expected_df, ignore_row_order=True)
 
-        actual_partition_columns = spark.sql(f"DESCRIBE DETAIL delta.`{table_path}`").select("partitionColumns").head()[0]
-        assert not actual_partition_columns, f"There should be no partition columns, instead got {actual_partition_columns}"
+        actual_partition_columns = (
+            spark.sql(f"DESCRIBE DETAIL delta.`{table_path}`").select("partitionColumns").head()[0]
+        )
+        assert (
+            not actual_partition_columns
+        ), f"There should be no partition columns, instead got {actual_partition_columns}"
 
     def test_should_not_partition_on_empty_partitioning_columns_list(self, spark: SparkSession, temp_dir: str):
         table_path = f"{temp_dir}/utils/data/TestInitTable/test_should_not_partition_on_empty_partitioning_columns_list"
@@ -96,8 +102,12 @@ class TestInitTable:
 
         assert_df_equality(actual_df, expected_df, ignore_row_order=True)
 
-        actual_partition_columns = spark.sql(f"DESCRIBE DETAIL delta.`{table_path}`").select("partitionColumns").head()[0]
-        assert not actual_partition_columns, f"There should be no partition columns, instead got {actual_partition_columns}"
+        actual_partition_columns = (
+            spark.sql(f"DESCRIBE DETAIL delta.`{table_path}`").select("partitionColumns").head()[0]
+        )
+        assert (
+            not actual_partition_columns
+        ), f"There should be no partition columns, instead got {actual_partition_columns}"
 
     def test_should_not_overwrite_by_default(self, spark: SparkSession, temp_dir: str):
         table_path = f"{temp_dir}/utils/data/TestInitTable/test_should_not_overwrite_by_default"
@@ -172,7 +182,7 @@ class TestInitTable:
                 ["john", 10, "US"],
                 ["jean", 20, "FR"],
             ],
-            schema="name string, age int, country string"
+            schema="name string, age int, country string",
         )
 
         df_2 = spark.createDataFrame(
@@ -180,7 +190,7 @@ class TestInitTable:
                 ["laura", 11, "IT"],
                 ["lena", 22, "ES"],
             ],
-            schema="name string, age int, country string"
+            schema="name string, age int, country string",
         )
 
         init_table(table_path, df_1)
@@ -189,7 +199,9 @@ class TestInitTable:
         init_table(table_path, df_2, partitioning_columns, overwrite=True)
 
         actual_df = spark.read.format("delta").load(table_path)
-        actual_partition_columns = spark.sql(f"DESCRIBE DETAIL delta.`{table_path}`").select("partitionColumns").head()[0]
+        actual_partition_columns = (
+            spark.sql(f"DESCRIBE DETAIL delta.`{table_path}`").select("partitionColumns").head()[0]
+        )
 
         assert_df_equality(actual_df, df_2, ignore_row_order=True)
         assert set(actual_partition_columns) == set(partitioning_columns)
@@ -202,7 +214,7 @@ class TestInitTable:
                 ["john", 10, "US"],
                 ["jean", 20, "FR"],
             ],
-            schema="name string, age int, country string"
+            schema="name string, age int, country string",
         )
 
         df_2 = spark.createDataFrame(
@@ -210,7 +222,7 @@ class TestInitTable:
                 ["laura", 11, "IT"],
                 ["lena", 22, "ES"],
             ],
-            schema="name string, age int, country string"
+            schema="name string, age int, country string",
         )
 
         partitioning_columns_1 = ["name"]
@@ -220,7 +232,9 @@ class TestInitTable:
         init_table(table_path, df_2, partitioning_columns_2, overwrite=True)
 
         actual_df = spark.read.format("delta").load(table_path)
-        actual_partition_columns = spark.sql(f"DESCRIBE DETAIL delta.`{table_path}`").select("partitionColumns").head()[0]
+        actual_partition_columns = (
+            spark.sql(f"DESCRIBE DETAIL delta.`{table_path}`").select("partitionColumns").head()[0]
+        )
 
         assert_df_equality(actual_df, df_2, ignore_row_order=True)
         assert set(actual_partition_columns) == set(partitioning_columns_2)
@@ -247,7 +261,7 @@ class TestMergeUpdates:
                 ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com", "Added"],
                 ["FR", "laura", "simon", 50, "laura.simon@gmail.com", "Added"],
             ],
-            schema
+            schema,
         )
 
         partitioning_columns = ["country"]
@@ -259,7 +273,7 @@ class TestMergeUpdates:
                 ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com", "Removed"],
                 ["IT", "marco", "simone", 70, "marco.simone@gmail.com", "Added"],
             ],
-            schema
+            schema,
         )
 
         merge_updates(table_path, updates)
@@ -272,7 +286,7 @@ class TestMergeUpdates:
                 ["FR", "laura", "simon", 50, "laura.simon@gmail.com", "Added"],
                 ["IT", "marco", "simone", 70, "marco.simone@gmail.com", "Added"],
             ],
-            schema
+            schema,
         )
 
         assert_df_equality(actual_df, expected_df, ignore_row_order=True)
@@ -297,7 +311,7 @@ class TestMergeUpdates:
                 ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com", "Added"],
                 ["FR", "laura", "simon", 50, "laura.simon@gmail.com", "Added"],
             ],
-            schema
+            schema,
         )
 
         partitioning_columns = ["country"]

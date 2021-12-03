@@ -71,16 +71,12 @@ if __name__ == "__main__":
                         "action": "init",
                         "scope": args.scope,
                         "storage-uri": args.storage_uri,
-                        "storage-key": args.storage_key
-                    }
+                        "storage-key": args.storage_key,
+                    },
                 },
-                "libraries": [
-                    {
-                        "whl": f"{args.dbfs_wheel_dir}/{full_wheel_name}"
-                    }
-                ]
+                "libraries": [{"whl": f"{args.dbfs_wheel_dir}/{full_wheel_name}"}],
             }
-        ]
+        ],
     }
 
     req = requests.post(create_job_url, data=json.dumps(job_conf), headers=headers)

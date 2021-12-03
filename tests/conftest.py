@@ -15,16 +15,15 @@ def spark(tmpdir_factory: TempdirFactory) -> SparkSession:
     :param tmpdir_factory: pytest's TempdirFactory fixture, see https://docs.pytest.org/en/6.2.x/tmpdir.html#the-tmpdir-factory-fixture
     :return: the Spark session for all unit tests
     """
-    warehouse_dir = str(tmpdir_factory.mktemp('warehouse'))
+    warehouse_dir = str(tmpdir_factory.mktemp("warehouse"))
     print(f"Warehouse dir: {warehouse_dir}")
 
     builder = (
-        SparkSession.builder
-            .master("local[*]")
-            .appName("unit-tests")
-            .config('spark.sql.warehouse.dir', warehouse_dir)
-            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-            .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+        SparkSession.builder.master("local[*]")
+        .appName("unit-tests")
+        .config("spark.sql.warehouse.dir", warehouse_dir)
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
     )
 
     # use yield instead of return to allow for cleanup
