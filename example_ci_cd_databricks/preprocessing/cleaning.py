@@ -8,8 +8,4 @@ def format_names(df: DataFrame) -> DataFrame:
     :param df: input dataframe, with at least columns "first_name" and "last_name"
     :return: input dataframe with formatted names
     """
-    return (
-        df
-            .withColumn("first_name", lower(col("first_name")))
-            .withColumn("last_name", lower(col("last_name")))
-    )
+    return df.withColumn("first_name", lower(col("first_name"))).withColumn("last_name", lower(col("last_name")))

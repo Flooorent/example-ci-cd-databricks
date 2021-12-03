@@ -24,6 +24,9 @@ jobs:
   - script: pip install -r requirements.txt
     displayName: 'Install python dependencies'
 
+  - script: black --check .
+    displayName: 'Check code format'
+
   - script: |
       python -m pytest --junit-xml=$(Build.Repository.LocalPath)/logs/TEST-LOCAL.xml
     displayName: 'Run Python Unit Tests for library code'

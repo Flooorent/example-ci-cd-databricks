@@ -29,6 +29,7 @@ def entry_point():
     # import DBUtils inside function entry_point and not at the top of the file to prevent error
     # ModuleNotFoundError: No module named 'pyspark.dbutils' (since this is specific to Databricks and not open source)
     from pyspark.dbutils import DBUtils
+
     dbutils = DBUtils(spark)
 
     adls_storage_uri = dbutils.secrets.get(scope=args.scope, key=args.storage_uri)

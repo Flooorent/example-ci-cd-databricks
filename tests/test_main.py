@@ -18,35 +18,31 @@ SCHEMA = ", ".join(
 
 def set_up_init(spark: SparkSession, table_path: str):
     (
-        spark
-            .createDataFrame(
-                [
-                    ["US", "John", "Doe", 30, "john.doe@gmail.com", "Added"],
-                    ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com", "Added"],
-                    ["FR", "laura", "simon", 50, "laura.simon@gmail.com", "Added"],
-                ],
-                schema=SCHEMA,
-            )
-            .write
-            .format("delta")
-            .save(table_path)
+        spark.createDataFrame(
+            [
+                ["US", "John", "Doe", 30, "john.doe@gmail.com", "Added"],
+                ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com", "Added"],
+                ["FR", "laura", "simon", 50, "laura.simon@gmail.com", "Added"],
+            ],
+            schema=SCHEMA,
+        )
+        .write.format("delta")
+        .save(table_path)
     )
 
 
 def set_up_merge(spark: SparkSession, table_path: str):
     (
-        spark
-            .createDataFrame(
-                [
-                    ["US", "John", "Doe", 31, "john.doe@gmail.com", "Updated"],
-                    ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com", "Removed"],
-                    ["IT", "marco", "simone", 70, "marco.simone@gmail.com", "Added"],
-                ],
-                schema=SCHEMA
-            )
-            .write
-            .format("delta")
-            .save(table_path)
+        spark.createDataFrame(
+            [
+                ["US", "John", "Doe", 31, "john.doe@gmail.com", "Updated"],
+                ["US", "JANE", "SMITH", 40, "jane.smith@gmail.com", "Removed"],
+                ["IT", "marco", "simone", 70, "marco.simone@gmail.com", "Added"],
+            ],
+            schema=SCHEMA,
+        )
+        .write.format("delta")
+        .save(table_path)
     )
 
 

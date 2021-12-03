@@ -27,16 +27,8 @@ if __name__ == "__main__":
 
     job_conf = {
         "job_id": args.job_id,
-        "new_settings":
-            {
-                "libraries": [
-                    {
-                        "whl": f"{args.dbfs_wheel_dir}/{full_wheel_name}"
-                    }
-                ]
-            }
+        "new_settings": {"libraries": [{"whl": f"{args.dbfs_wheel_dir}/{full_wheel_name}"}]},
     }
 
     req = requests.post(update_job_url, data=json.dumps(job_conf), headers=headers)
     print(req.text)
-
